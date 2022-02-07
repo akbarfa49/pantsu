@@ -27,8 +27,15 @@ func String(ctx *fasthttp.RequestCtx, str string) (err error) {
 	return
 }
 
-func Error(ctx *fasthttp.RequestCtx, status int, msg string) {
+func Error(ctx *fasthttp.RequestCtx, status int, msg string) error {
 	ctx.SetStatusCode(status)
 	ctx.WriteString(msg)
+	return nil
+}
 
+func NotFound(ctx *fasthttp.RequestCtx) error {
+	ctx.Response.Reset()
+	ctx.SetStatusCode(fasthttp.StatusNotFound)
+	ctx.SetBodyString(`404 not found`)
+	return nil
 }

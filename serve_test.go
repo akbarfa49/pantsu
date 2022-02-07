@@ -13,7 +13,9 @@ import (
 
 func TestRealWorld(t *testing.T) {
 	cli := http.DefaultClient
-	pant := pantsu.NewPantsu()
+	pant := pantsu.NewPantsu(pantsu.Config{
+		GlobalErrorHandler: notFoundHandler,
+	})
 	runGet1 := `ok`
 	pant.Get(`/`, func(ctx *fasthttp.RequestCtx) error {
 		return pantsu.String(ctx, runGet1)
@@ -53,4 +55,8 @@ func TestRealWorld(t *testing.T) {
 		}
 		assert.Equal(t, res.StatusCode, 404)
 	})
+}
+
+func notFoundHandler(ctx *fasthttp.RequestCtx) error {
+	return pantsu.NotFound(ctx)
 }
