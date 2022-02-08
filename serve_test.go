@@ -1,10 +1,11 @@
 package pantsu_test
 
 import (
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/akbarfa49/pantsu"
 	"github.com/stretchr/testify/assert"
@@ -17,9 +18,11 @@ func TestRealWorld(t *testing.T) {
 		GlobalErrorHandler: notFoundHandler,
 	})
 	runGet1 := `ok`
+	pant.Use(timer())
 	pant.Get(`/`, func(ctx *fasthttp.RequestCtx) error {
 		return pantsu.String(ctx, runGet1)
 	})
+
 	go fasthttp.ListenAndServe(`:8080`, pant.ServeHTTP)
 
 	t.Run(`GET OK`, func(t *testing.T) {
@@ -38,7 +41,6 @@ func TestRealWorld(t *testing.T) {
 			return
 		}
 		b, _ := io.ReadAll(res.Body)
-		fmt.Println(string(b))
 		assert.Equal(t, string(b), runGet1)
 	})
 	t.Run(`GET NOT FOUND`, func(t *testing.T) {
@@ -59,4 +61,16 @@ func TestRealWorld(t *testing.T) {
 
 func notFoundHandler(ctx *fasthttp.RequestCtx) error {
 	return pantsu.NotFound(ctx)
+}
+
+func timer() func(next pantsu.Handler) pantsu.Handler {
+	return func(next pantsu.Handler) pantsu.Handler {
+
+		return func(ctx *fasthttp.RequestCtx) error {
+			t := time.Now()
+			next(ctx)
+			log.Println(`time until done `, time.Since(t).Nanoseconds(), ` nano second`)
+			return nil
+		}
+	}
 }

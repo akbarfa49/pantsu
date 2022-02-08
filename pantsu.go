@@ -2,8 +2,6 @@ package pantsu
 
 import (
 	"bytes"
-	"log"
-	"time"
 
 	"github.com/cornelk/hashmap"
 	"github.com/valyala/fasthttp"
@@ -35,6 +33,10 @@ func (mux *Pantsu) Get(url string, handler Handler, middleware ...MiddlewareFunc
 	}
 	middleware = append(middleware, mux.middlewares...)
 	mux.addRoute(buildRoute(url, fasthttp.MethodGet, handler, middleware...))
+}
+func (mux *Pantsu) Use(middlewares ...MiddlewareFunc) {
+	mux.middlewares = append(mux.middlewares, middlewares...)
+	mux.config.GlobalErrorHandler = WithMiddlewares(mux.middlewares...)(mux.config.GlobalErrorHandler)
 }
 
 func (mux *Pantsu) getRoute(ctx *fasthttp.RequestCtx) Route {
@@ -68,7 +70,6 @@ func (mux *Pantsu) getRoute(ctx *fasthttp.RequestCtx) Route {
 }
 
 func (mux *Pantsu) ServeHTTP(ctx *fasthttp.RequestCtx) {
-	tm := time.Now()
 
 	route := mux.getRoute(ctx)
 	err := route.Handler(ctx)
@@ -76,7 +77,6 @@ func (mux *Pantsu) ServeHTTP(ctx *fasthttp.RequestCtx) {
 		ctx.SetStatusCode(500)
 		ctx.Write([]byte(err.Error()))
 	}
-	log.Println(time.Since(tm).Microseconds(), ` microsecond elapsed`)
 }
 
 var globalErrorHandler = func(ctx *fasthttp.RequestCtx) error {
