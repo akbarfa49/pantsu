@@ -1,7 +1,7 @@
 package pantsu
 
 import (
-	"bytes"
+	"net/http"
 
 	"github.com/cornelk/hashmap"
 	"github.com/valyala/fasthttp"
@@ -28,7 +28,7 @@ func NewPantsu(conf ...Config) *Pantsu {
 
 func (mux *Pantsu) Get(url string, handler Handler, middleware ...MiddlewareFunc) {
 	if mux.parent != nil {
-		//mux.addRouteFromGroup(buildRoute(url, http.MethodGet, handler))
+		mux.addRouteFromGroup(buildRoute(url, http.MethodGet, handler, middleware...))
 		return
 	}
 	middleware = append(middleware, mux.middlewares...)
@@ -42,8 +42,8 @@ func (mux *Pantsu) Use(middlewares ...MiddlewareFunc) {
 func (mux *Pantsu) getRoute(ctx *fasthttp.RequestCtx) Route {
 	path := ctx.Path()
 	method := ctx.Method()
-	if mux.config.RemoveTrailingSlash && len(path) > 1 && bytes.HasSuffix(path, []byte(`/`)) {
-		path = path[:len(path)-1]
+	if lp := len(path); mux.config.RemoveTrailingSlash && lp > 1 && path[lp-1] == '/' {
+		path = path[:lp-1]
 	}
 	mux.routes.String()
 	foundRouteMap, ok := mux.routes.Get(path)
@@ -72,6 +72,7 @@ func (mux *Pantsu) getRoute(ctx *fasthttp.RequestCtx) Route {
 func (mux *Pantsu) ServeHTTP(ctx *fasthttp.RequestCtx) {
 
 	route := mux.getRoute(ctx)
+
 	err := route.Handler(ctx)
 	if err != nil {
 		ctx.SetStatusCode(500)

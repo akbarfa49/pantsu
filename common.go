@@ -6,6 +6,18 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
+var methodList = []string{
+	fasthttp.MethodConnect,
+	fasthttp.MethodDelete,
+	fasthttp.MethodGet,
+	fasthttp.MethodHead,
+	fasthttp.MethodOptions,
+	fasthttp.MethodPatch,
+	fasthttp.MethodPost,
+	fasthttp.MethodPut,
+	fasthttp.MethodTrace,
+}
+
 func WithMiddlewares(middleware ...MiddlewareFunc) MiddlewareFunc {
 	return func(next Handler) Handler {
 		h := next
