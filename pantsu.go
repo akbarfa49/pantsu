@@ -106,7 +106,6 @@ func (mux *Pantsu) getRoute(ctx *fasthttp.RequestCtx) Route {
 	if lp := len(path); mux.config.RemoveTrailingSlash && lp > 1 && path[lp-1] == '/' {
 		path = path[:lp-1]
 	}
-	mux.routes.String()
 	foundRouteMap, ok := mux.routes.Get(path)
 	if !ok {
 		foundRouteMap, _ = mux.routesParam.Get(bFindPathIndex(path))
