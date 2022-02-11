@@ -7,15 +7,11 @@ import (
 )
 
 var methodList = []string{
-	fasthttp.MethodConnect,
-	fasthttp.MethodDelete,
 	fasthttp.MethodGet,
-	fasthttp.MethodHead,
-	fasthttp.MethodOptions,
-	fasthttp.MethodPatch,
 	fasthttp.MethodPost,
 	fasthttp.MethodPut,
-	fasthttp.MethodTrace,
+	fasthttp.MethodDelete,
+	fasthttp.MethodPatch,
 }
 
 func WithMiddlewares(middleware ...MiddlewareFunc) MiddlewareFunc {

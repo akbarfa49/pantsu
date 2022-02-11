@@ -1,10 +1,12 @@
 package pantsu
 
 import (
-	"net/http"
-
 	"github.com/cornelk/hashmap"
 	"github.com/valyala/fasthttp"
+)
+
+var (
+	_ Handler
 )
 
 type Pantsu struct {
@@ -28,11 +30,70 @@ func NewPantsu(conf ...Config) *Pantsu {
 
 func (mux *Pantsu) Get(url string, handler Handler, middleware ...MiddlewareFunc) {
 	if mux.parent != nil {
-		mux.addRouteFromGroup(buildRoute(url, http.MethodGet, handler, middleware...))
+		mux.addRouteFromGroup(buildRoute(url, fasthttp.MethodGet, handler, middleware...))
 		return
 	}
 	middleware = append(middleware, mux.middlewares...)
 	mux.addRoute(buildRoute(url, fasthttp.MethodGet, handler, middleware...))
+}
+func (mux *Pantsu) Post(url string, handler Handler, middleware ...MiddlewareFunc) {
+	if mux.parent != nil {
+		mux.addRouteFromGroup(buildRoute(url, fasthttp.MethodPost, handler, middleware...))
+		return
+	}
+	middleware = append(middleware, mux.middlewares...)
+	mux.addRoute(buildRoute(url, fasthttp.MethodPost, handler, middleware...))
+}
+
+func (mux *Pantsu) Put(url string, handler Handler, middleware ...MiddlewareFunc) {
+	if mux.parent != nil {
+		mux.addRouteFromGroup(buildRoute(url, fasthttp.MethodPut, handler, middleware...))
+		return
+	}
+	middleware = append(middleware, mux.middlewares...)
+	mux.addRoute(buildRoute(url, fasthttp.MethodPut, handler, middleware...))
+}
+
+func (mux *Pantsu) Delete(url string, handler Handler, middleware ...MiddlewareFunc) {
+	if mux.parent != nil {
+		mux.addRouteFromGroup(buildRoute(url, fasthttp.MethodDelete, handler, middleware...))
+		return
+	}
+	middleware = append(middleware, mux.middlewares...)
+	mux.addRoute(buildRoute(url, fasthttp.MethodDelete, handler, middleware...))
+}
+
+func (mux *Pantsu) Patch(url string, handler Handler, middleware ...MiddlewareFunc) {
+	if mux.parent != nil {
+		mux.addRouteFromGroup(buildRoute(url, fasthttp.MethodPatch, handler, middleware...))
+		return
+	}
+	middleware = append(middleware, mux.middlewares...)
+	mux.addRoute(buildRoute(url, fasthttp.MethodPatch, handler, middleware...))
+}
+
+func (mux *Pantsu) All(url string, handler Handler, middleware ...MiddlewareFunc) {
+	if mux.parent != nil {
+		for _, method := range methodList {
+			mux.addRouteFromGroup(buildRoute(url, method, handler))
+		}
+		return
+	}
+
+	for _, method := range methodList {
+		middleware = append(middleware, mux.middlewares...)
+		mux.addRoute(buildRoute(url, method, handler, middleware...))
+	}
+}
+
+//im not sure this will working when using web. but atleast this working when use any http client
+func (mux *Pantsu) Custom(method string, url string, handler Handler, middleware ...MiddlewareFunc) {
+	if mux.parent != nil {
+		mux.addRouteFromGroup(buildRoute(url, method, handler, middleware...))
+		return
+	}
+	middleware = append(middleware, mux.middlewares...)
+	mux.addRoute(buildRoute(url, method, handler, middleware...))
 }
 func (mux *Pantsu) Use(middlewares ...MiddlewareFunc) {
 	mux.middlewares = append(mux.middlewares, middlewares...)

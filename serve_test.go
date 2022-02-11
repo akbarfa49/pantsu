@@ -22,6 +22,12 @@ func TestRealWorld(t *testing.T) {
 	pant.Get(`/`, func(ctx *fasthttp.RequestCtx) error {
 		return pantsu.String(ctx, runGet1)
 	})
+	test2_url := `/pantsu/`
+	test2_return := `new pantsu`
+	pant.Custom(`Greet`, test2_url, func(ctx *fasthttp.RequestCtx) error {
+		ctx.WriteString(test2_return)
+		return nil
+	})
 
 	go fasthttp.ListenAndServe(`:8080`, pant.ServeHTTP)
 
@@ -57,8 +63,24 @@ func TestRealWorld(t *testing.T) {
 		}
 		assert.Equal(t, res.StatusCode, 404)
 	})
-}
+	t.Run(`test custom Greet Pantsu`, func(t *testing.T) {
+		req, err := http.NewRequest(`Greet`, `http://localhost:8080/`+test2_url, nil)
 
+		assert.Empty(t, err)
+		if err != nil {
+			return
+		}
+
+		res, err := cli.Do(req)
+
+		assert.Empty(t, err)
+		if err != nil {
+			return
+		}
+		b, _ := io.ReadAll(res.Body)
+		assert.Equal(t, string(b), test2_return)
+	})
+}
 func notFoundHandler(ctx *fasthttp.RequestCtx) error {
 	return pantsu.NotFound(ctx)
 }

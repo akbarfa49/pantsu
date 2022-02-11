@@ -15,9 +15,10 @@ func s2b(s string) (b []byte) {
 	bh.Len = sh.Len
 	return b
 }
-func b2s(b []byte) string {
-	return *(*string)(unsafe.Pointer(&b))
-}
+
+// func b2s(b []byte) string {
+// 	return *(*string)(unsafe.Pointer(&b))
+// }
 
 const splitter = ':'
 
